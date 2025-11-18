@@ -1,5 +1,5 @@
 {
-  "name": "clase-node",
+  "name": "tp-final-backend",
   "version": "2.0.0",
   "main": "./src/main.js",
   "scripts": {
@@ -8,10 +8,10 @@
     "nodemon-dev": "nodemon ./src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "matu.dev",
+  "author": "abril-mh",
   "license": "ISC",
   "type": "module",
-  "description": "Intento de app con node.js",
+  "description": "backend del trabajo integrador final UTN - to do list",
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
