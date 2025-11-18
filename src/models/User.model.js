@@ -1,44 +1,38 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
-//Se usa para crear/definir esquemas
 const userSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: true
+            required: true,
+            trim: true,
         },
+
         email: {
             type: String,
             required: true,
-            unique: true
+            unique: true,
+            lowercase: true,
+            trim: true,
         },
+
         password: {
             type: String,
-            required: true
+            required: true,
         },
-        created_at: {
-            type: Date,
-            default: Date.now,
-            required: true
-        },
-        modified_at: {
-            type: Date,
-            default: null
-        },
-        active: {
-            type: Boolean,
-            default: true,
-            required: true
-        },
-        verified_email: {
-            type: Boolean,
-            default: false
-        }
-    }
-)
 
-//El modelo registra el schema para cierta entidad que luego sera guardada en la coleccion
-//Ejemplo: Quiero guardar usuarios, entonces mi entidad es usuario y registro en mongoose que para la entidad usuario se debera cumplir con x schema
-const User = mongoose.model('User', userSchema)
+        verified: {
+            type: Boolean,
+            default: false,
+        },
 
-export default User
+        verificationToken: {
+            type: String,
+            default: null,
+        },
+    },
+    { timestamps: true }
+);
+
+export default mongoose.model("User", userSchema);
+
