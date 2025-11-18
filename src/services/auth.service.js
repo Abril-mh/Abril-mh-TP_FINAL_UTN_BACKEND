@@ -1,145 +1,81 @@
-import ENVIRONMENT from "../config/environment.config.js";
-import mailTransporter from "../config/mailTransporter.config.js";
-import { ServerError } from "../error.js";
-import UserRepository from "../repositories/user.repository.js";
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { userRepository } from "../repositories/user.repository.js";
+import { generateToken } from "../utils/token.js";
+import { sendVerificationEmail } from "../utils/sendEmail.js";
 
+/**
+ * authService
+ * - register({name,email,password}) -> crea usuario, envía mail con token de verificación
+ * - verify(token) -> verifica token, marca user.verified = true
+ * - login({email,password}) -> valida credenciales y devuelve JWT de sesión
+ */
+export const authService = {
+    register: async ({ name, email, password }) => {
+        const exist = await userRepository.findByEmail(email);
+        if (exist) throw new Error("El email ya está registrado");
 
-class AuthService {
-    static async register(email, password, name){
+        const hashed = await bcrypt.hash(password, 10);
+        const verificationToken = generateToken({ email }, "1d");
 
-        console.log(email, name, password)
-        const user = await UserRepository.getByEmail(email)
-        
-        if(user){
-            throw new ServerError(400, 'Email ya en uso')
-        }
-    
-        const password_hashed = await bcrypt.hash(password, 12)
-        const user_created = await UserRepository.create(name, email, password_hashed)
-        const user_id_created = user_created._id
+        const user = await userRepository.create({
+            name,
+            email,
+            password: hashed,
+            verificationToken,
+        });
 
-        //CREAMOS UN JSON WEB TOKEN
-        //Un JSON web token es un objeto pasado a texto con una firma (SIGNATURE)
-        //Vamos a enviar entre JWT por URL 
+        // enviar mail con link de verificación (CLIENT_URL debe estar en .env)
+        await sendVerificationEmail(email, verificationToken);
 
-        //.sing() firmar un token
-        const verification_token = jwt.sign(
-            {
-                user_id: user_id_created
-            },
-            ENVIRONMENT.JWT_SECRET
-        )
+        // No devolvemos la password ni el token en la respuesta real (por seguridad).
+        const userSafe = { ...user.toObject ? user.toObject() : user };
+        delete userSafe.password;
+        delete userSafe.verificationToken;
+        return userSafe;
+    },
 
-        await mailTransporter.sendMail({
-            from: ENVIRONMENT.GMAIL_USER,
-            to: email,
-            subject: 'Verifica tu cuenta de mail',
-            html: `
-                <h1>Verifica tu cuenta de mail</h1>
-                <a href="${ENVIRONMENT.URL_BACKEND}/api/auth/verify-email/${verification_token}">Verificar</a>
-            `
-        })
+    verify: async (token) => {
+        if (!token) throw new Error("Token no proporcionado");
 
-        return
-    }
-
-    static async verifyEmail (verification_token){
-        try{
-            //Nos dice si el token esta firmado con x clave
-            const payload = jwt.verify(
-                verification_token, 
-                ENVIRONMENT.JWT_SECRET
-            )
-            const {user_id} = payload
-            if(!user_id){
-                throw new ServerError(400, 'Accion denegada, token con datos insuficientes')
-            } 
-
-            const user_found = await UserRepository.getById(user_id)
-            if(!user_found){
-                throw new ServerError(404, 'Usuario no encontrado')
-            }
-
-            if(user_found.verified_email){
-                throw new ServerError(400, 'Usuario ya validado')
-            }
-
-            await UserRepository.updateById(user_id, {verified_email: true})
-
-            return 
-        }
-        catch(error){
-            //Checkeamos si el error es de la verificacion del token
-            if(error instanceof jwt.JsonWebTokenError){
-                throw new ServerError(400, 'Accion denegada, token invalido')
-            }
-            throw error
-        }
-    }
-
-    static async login (email, password){
-        /* 
-        -Buscar al usuario por email
-        -Validar que exista
-        -Validar que este verificado su mail
-        -Comparar la password recibida con la del usuario
-        -Genera un token con datos de sesion del usuario y responderlo
-        */
-
-        const user_found = await UserRepository.getByEmail(email)
-        
-        if(!user_found) {
-            throw new ServerError(404, 'Usuario con este mail no encontrado')
-        }
-        
-        if(!user_found.verified_email){
-            throw new ServerError(401, 'Usuario con mail no verificado')
+        let payload;
+        try {
+            payload = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            if (err.name === "TokenExpiredError") throw new Error("Token expirado");
+            throw new Error("Token inválido");
         }
 
-        const is_same_passoword = await bcrypt.compare( password, user_found.password )
-        if(!is_same_passoword){
-            throw new ServerError(401, 'Contraseña invalida')
-        }
+        const user = await userRepository.findByEmail(payload.email);
+        if (!user) throw new Error("Usuario no encontrado");
 
-        //creo un token con datos de sesion (DATOS NO SENSIBLES)
-        const auth_token = jwt.sign(
-            {
-                name: user_found.name,
-                email: user_found.email,
-                id: user_found._id,
-            },
-            ENVIRONMENT.JWT_SECRET,
-            {
-                expiresIn: '24h'
-            }
-        )
+        if (user.verified) throw new Error("Usuario ya verificado");
 
-        return {
-            auth_token: auth_token
-        }
-    }
-}
+        // marcar verificado y limpiar token
+        user.verified = true;
+        user.verificationToken = null;
+        await user.save();
 
-export default AuthService
+        const userSafe = { ...user.toObject ? user.toObject() : user };
+        delete userSafe.password;
+        return userSafe;
+    },
 
-/* 
-AUTOMATIZACION DE GENERADOR DE CLAVES PARA JWT
+    login: async ({ email, password }) => {
+        const user = await userRepository.findByEmail(email);
+        if (!user) throw new Error("Credenciales inválidas");
 
-Creo esta tabla o coleccion
-- type: "AUTH" | "PRODUCTS" | "SESSIONS"
-- id : INT | STRING
-- secret : STRING
-- expire_in : DATE
-- created_at: DATE
-- active: boolean
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) throw new Error("Credenciales inválidas");
 
-PARA CREAR: 
-    Cada vez que creemos el token usamos el ultimo registro de la tabla
-    Si el registro esta expirado crear uno nuevo
-    y guardamos en el token el secret_id (el id de esa clave)
+        if (!user.verified) throw new Error("La cuenta aún no está verificada");
 
-PARA USAR/VERIFICAR: 
-    Vas a tomar el secret_id y vas a buscar el la DB si existe un secreto con ese secret_id, en caso de existir vas a verificar el token con ese secret
-*/
+        const tokenPayload = { id: user._id, email: user.email, name: user.name };
+        const authToken = generateToken(tokenPayload, "24h");
+
+        const userSafe = { ...user.toObject ? user.toObject() : user };
+        delete userSafe.password;
+
+        return { user: userSafe, token: authToken };
+    },
+};
