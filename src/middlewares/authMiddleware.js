@@ -1,62 +1,88 @@
-import ENVIRONMENT from "../config/environment.config.js"
-import { ServerError } from "../error.js"
-import jwt from 'jsonwebtoken'
+// middlewares/auth.js
+import jwt from "jsonwebtoken";
+import { User } from "../models/User.model.js";
 
-function authMiddleware(request, response, next) {
+export const authMiddleware = async (req, res, next) => {
     try {
-        const auth_header = request.headers.authorization
-        if (!auth_header) {
-            throw new ServerError(401, 'No hay header de autorizacion')
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ message: "No autorizado" });
         }
 
-        const auth_token = auth_header.split(' ')[1]
-        if (!auth_token) {
-            throw new ServerError(401, 'No hay token de autorizacion')
-        }
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user_session_data = jwt.verify(auth_token, ENVIRONMENT.JWT_SECRET)
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(401).json({ message: "Usuario no encontrado" });
 
-        //HOT POINT: GUARDAMOS LOS DATOS DEL TOKEN DENTRO DE LA REQUEST
-        request.user = user_session_data
-        next()
+        req.user = user; // guardamos el usuario en req para usarlo en controllers
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: "Token inválido" });
     }
-    catch (error) {
-        if (error instanceof jwt.JsonWebTokenError) {
-            response.status(400).json(
-                {
-                    ok: false,
-                    message: 'Token invalido',
-                    status: 400
-                }
-            )
-        }
-        else if (error instanceof jwt.TokenExpiredError) {
-            response.status(401).json(
-                {
-                    ok: false,
-                    message: 'Token expirado',
-                    status: 401
-                }
-            )
-        }
-        else if (error.status) {
-            return response.status(error.status).json({
-                ok: false,
-                message: error.message,
-                status: error.status
-            })
-        }
-        else {
-            console.error(
-                'ERROR AL OBTENER LOS WORKSPACES', error
-            )
-            return response.status(500).json({
-                ok: false,
-                message: 'Error interno del servidor',
-                status: 500
-            })
-        }
-    }
-}
+};
 
-export default authMiddleware
+
+
+// import ENVIRONMENT from "../config/environment.config.js"
+// import { ServerError } from "../error.js"
+// import jwt from 'jsonwebtoken'
+
+// function authMiddleware(request, response, next) {
+//     try {
+//         const auth_header = request.headers.authorization
+//         if (!auth_header) {
+//             throw new ServerError(401, 'No hay header de autorizacion')
+//         }
+
+//         const auth_token = auth_header.split(' ')[1]
+//         if (!auth_token) {
+//             throw new ServerError(401, 'No hay token de autorizacion')
+//         }
+
+//         const user_session_data = jwt.verify(auth_token, ENVIRONMENT.JWT_SECRET)
+
+//         //HOT POINT: GUARDAMOS LOS DATOS DEL TOKEN DENTRO DE LA REQUEST
+//         request.user = user_session_data
+//         next()
+//     }
+//     catch (error) {
+//         if (error instanceof jwt.JsonWebTokenError) {
+//             response.status(400).json(
+//                 {
+//                     ok: false,
+//                     message: 'Token invalido',
+//                     status: 400
+//                 }
+//             )
+//         }
+//         else if (error instanceof jwt.TokenExpiredError) {
+//             response.status(401).json(
+//                 {
+//                     ok: false,
+//                     message: 'Token expirado',
+//                     status: 401
+//                 }
+//             )
+//         }
+//         else if (error.status) {
+//             return response.status(error.status).json({
+//                 ok: false,
+//                 message: error.message,
+//                 status: error.status
+//             })
+//         }
+//         else {
+//             console.error(
+//                 'ERROR AL OBTENER LOS WORKSPACES', error
+//             )
+//             return response.status(500).json({
+//                 ok: false,
+//                 message: 'Error interno del servidor',
+//                 status: 500
+//             })
+//         }
+//     }
+// }
+
+// export default authMiddleware
