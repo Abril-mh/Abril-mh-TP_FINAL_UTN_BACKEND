@@ -1,4 +1,4 @@
-import Category from "../models/Category.js";
+import Category from "../models/Category.model.js";
 
 export const categoryRepository = {
     create: (data) => Category.create(data),

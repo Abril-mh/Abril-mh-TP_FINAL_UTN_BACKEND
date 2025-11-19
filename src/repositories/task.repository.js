@@ -1,4 +1,4 @@
-import Task from "../models/Task.js";
+import Task from "../models/task.model.js";
 
 export const taskRepository = {
     create: (data) => Task.create(data),

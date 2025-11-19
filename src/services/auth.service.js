@@ -1,9 +1,8 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { userRepository } from "../repositories/user.repository.js";
 import { generateToken } from "../utils/token.js";
 import { sendVerificationEmail } from "../utils/sendEmail.js";
-
 /**
  * authService
  * - register({name,email,password}) -> crea usuario, envía mail con token de verificación
