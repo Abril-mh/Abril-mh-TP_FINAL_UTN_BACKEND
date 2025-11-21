@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 
 /**
  * Genera un JWT
- * @param {Object} payload - Datos que queremos guardar en el token (ej: {id, email})
- * @param {String} expiresIn - Tiempo de expiración (default: 24h)
+ * @param {Object} payload - Datos que queremos guardar en el token 
+ * @param {String} expiresIn - aca era el Tiempo de expiración (24h)
  * @returns {String} JWT firmado
  */
 export const generateToken = (payload, expiresIn = "24h") => {
@@ -11,10 +11,10 @@ export const generateToken = (payload, expiresIn = "24h") => {
 };
 
 /**
- * Verifica un JWT
+ * Verifica un JWT, lol
  * @param {String} token - Token JWT recibido
  * @returns {Object} payload decodificado
- * @throws Error si el token es inválido o expiró
+ * @throws Error por si el token es inválido o expiró
  */
 export const verifyToken = (token) => {
     return jwt.verify(token, process.env.JWT_SECRET);
