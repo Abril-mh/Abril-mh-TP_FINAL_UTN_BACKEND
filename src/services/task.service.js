@@ -3,7 +3,6 @@ import { categoryRepository } from "../repositories/category.repository.js";
 
 export const taskService = {
     createTask: async ({ title, description, userId, categoryId }) => {
-        // Validar que la categoría exista y pertenezca al usuario
         const category = await categoryRepository.findByUser(userId)
             .then(cats => cats.find(c => c._id.toString() === categoryId));
 

@@ -3,12 +3,7 @@ import jwt from "jsonwebtoken";
 import { userRepository } from "../repositories/user.repository.js";
 import { generateToken } from "../utils/token.js";
 import { sendVerificationEmail } from "../utils/sendEmail.js";
-/**
- * authService
- * - register({name,email,password}) -> crea usuario, envía mail con token de verificación
- * - verify(token) -> verifica token, marca user.verified = true
- * - login({email,password}) -> valida credenciales y devuelve JWT de sesión
- */
+
 export const authService = {
     register: async ({ name, email, password }) => {
         const exist = await userRepository.findByEmail(email);
@@ -24,10 +19,10 @@ export const authService = {
             verificationToken,
         });
 
-        // enviar mail con link de verificación (CLIENT_URL debe estar en .env)
+        // enviar mail con link de verificación, tiburoncin ujaja
         await sendVerificationEmail(email, verificationToken);
 
-        // No devolvemos la password ni el token en la respuesta real (por seguridad).
+        // No devolvemos la password ni el token en la respuesta real.
         const userSafe = { ...user.toObject ? user.toObject() : user };
         delete userSafe.password;
         delete userSafe.verificationToken;
@@ -50,7 +45,6 @@ export const authService = {
 
         if (user.verified) throw new Error("Usuario ya verificado");
 
-        // marcar verificado y limpiar token
         user.verified = true;
         user.verificationToken = null;
         await user.save();
