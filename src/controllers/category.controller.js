@@ -1,22 +1,49 @@
-import { categoryService } from "../services/category.service.js";
+import { getAllCategories,createCategory,getCategoryById,updateCategory,deleteCategory } from "../services/category.service.js";
 
 export const categoryController = {
-    create: (req, res, next) => {
-        categoryService.createCategory({ ...req.body, userId: req.user.id })
-            .then(category => res.status(201).json(category))
-            .catch(next);
+
+    async getAll(req, res, next) {
+        try {
+            const categories = await getAllCategories();
+            res.json(categories);
+        } catch (error) {
+            next(error);
+        }
     },
 
-    getAll: (req, res, next) => {
-        categoryService.getCategoriesByUser(req.user.id)
-            .then(categories => res.json(categories))
-            .catch(next);
+    async getById(req, res, next) {
+        try {
+            const category = await getCategoryById(req.params.id);
+            res.json(category);
+        } catch (error) {
+            next(error);
+        }
     },
 
-    delete: (req, res, next) => {
-        categoryService.deleteCategory(req.params.id, req.user.id)
-            .then(() => res.json({ message: "Categoría eliminada" }))
-            .catch(next);
+    async create(req, res, next) {
+        try {
+            const newCategory = await createCategory(req.body);
+            res.status(201).json(newCategory);
+        } catch (error) {
+            next(error);
+        }
     },
+
+    async update(req, res, next) {
+        try {
+            const updated = await updateCategory(req.params.id, req.body);
+            res.json(updated);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    async delete(req, res, next) {
+        try {
+            await deleteCategory(req.params.id);
+            res.status(204).send();
+        } catch (error) {
+            next(error);
+        }
+    }
 };
-

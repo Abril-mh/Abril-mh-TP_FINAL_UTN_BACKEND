@@ -1,4 +1,4 @@
-import categoryRepository from "../repositories/category.repository.js";
+import { categoryRepository } from "../repositories/category.repository.js";
 
 // Obtener todas las categorías
 export async function getAllCategories() {
