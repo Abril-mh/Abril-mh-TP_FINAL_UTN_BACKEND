@@ -1,15 +1,26 @@
-import { categoryRepository } from "../repositories/category.repository.js";
+import categoryRepository from "../repositories/category.repository.js";
 
-export const categoryService = {
-    createCategory: async ({ name, userId }) => categoryRepository.create({ name, user: userId }),
-    getCategoriesByUser: async (userId) => categoryRepository.findByUser(userId),
-    deleteCategory: async (categoryId, userId) => {
-        const category = await categoryRepository.findByUser(userId)
-            .then(cats => cats.find(c => c._id.toString() === categoryId));
+// Obtener todas las categorías
+export async function getAllCategories() {
+    return await categoryRepository.findAll();
+}
 
-        if (!category) throw new Error("Categoría no encontrada o no autorizada");
+// se Crea categoría, jiji
+export async function createCategory(data) {
+    return await categoryRepository.create(data);
+}
 
-        return categoryRepository.delete(categoryId);
-    },
-};
+// Obtener categoría por ID
+export async function getCategoryById(id) {
+    return await categoryRepository.findById(id);
+}
 
+// Actualizar categoría
+export async function updateCategory(id, data) {
+    return await categoryRepository.update(id, data);
+}
+
+// Eliminar categoría
+export async function deleteCategory(id) {
+    return await categoryRepository.delete(id);
+}

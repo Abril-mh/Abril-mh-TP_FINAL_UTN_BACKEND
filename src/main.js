@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import connectToMongoDB from "./config/configMongoDB.config.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 
 import authRoutes from "./routes/auth.router.js";
 import taskRoutes from "./routes/task.router.js";
@@ -17,7 +17,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/categories", categoryRoutes);
 
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 connectToMongoDB();
 

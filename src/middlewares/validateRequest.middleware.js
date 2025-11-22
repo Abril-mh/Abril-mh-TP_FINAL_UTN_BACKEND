@@ -1,16 +1,19 @@
 import { validateRequest } from "../middlewares/validateRequest.middleware.js";
 import { registerSchema } from "../schemas/auth.schema.js";
 
-
-
-export const validateRequest = (schema) => {
+export function validateRequest(schema) {
     return (req, res, next) => {
-        const { error } = schema.validate(req.body);
+        const { error, value } = schema.validate(req.body, { abortEarly: false });
+
         if (error) {
-            return res.status(400).json({ message: error.details[0].message });
+            return res.status(400).json({
+                ok: false,
+                message: "Datos inválidos (Joi rugiendo como un gato enojado 😾)",
+                errors: error.details.map(err => err.message)
+            });
         }
+
+        req.body = value; //  el body ya viene limpito, como gato bañado
         next();
     };
-};
-
-router.post("/register", validateRequest(registerSchema), authController.register);
+}
