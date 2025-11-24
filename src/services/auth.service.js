@@ -19,10 +19,8 @@ export const authService = {
             verificationToken,
         });
 
-        // enviar mail con link de verificación, tiburoncin ujaja
         await sendVerificationEmail(email, verificationToken);
 
-        // No devolvemos la password ni el token en la respuesta real.
         const userSafe = { ...user.toObject ? user.toObject() : user };
         delete userSafe.password;
         delete userSafe.verificationToken;
@@ -66,9 +64,7 @@ export const authService = {
         const tokenPayload = { id: user._id, email: user.email, name: user.name };
         const authToken = generateToken(tokenPayload, "24h");
 
-        const userSafe = { ...user.toObject ? user.toObject() : user };
-        delete userSafe.password;
-
-        return { user: userSafe, token: authToken };
+        // devolvemos SOLO el token, no el objeto completo
+        return authToken;
     },
 };
