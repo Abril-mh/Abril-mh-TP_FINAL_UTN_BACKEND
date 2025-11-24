@@ -20,14 +20,18 @@ export const categoryController = {
         }
     },
 
-    async create(req, res, next) {
-        try {
-            const newCategory = await createCategory(req.body);
-            res.status(201).json(newCategory);
-        } catch (error) {
-            next(error);
-        }
-    },
+async create(req, res, next) {
+    try {
+        const { name } = req.body;
+        const newCategory = await createCategory({
+            name,
+            user: req.user._id  
+        });
+        res.status(201).json(newCategory);
+    } catch (error) {
+        next(error);
+    }
+},
 
     async update(req, res, next) {
         try {
