@@ -2,7 +2,7 @@ import { taskService } from "../services/task.service.js";
 
 export const taskController = {
     create: (req, res, next) => {
-        taskService.createTask({ ...req.body, userId: req.user.id })
+        taskService.createTask({ ...req.body, userId: req.user._id })
             .then(task => res.status(201).json(task))
             .catch(next);
     },
