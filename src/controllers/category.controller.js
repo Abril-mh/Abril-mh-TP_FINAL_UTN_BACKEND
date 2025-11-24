@@ -4,7 +4,7 @@ export const categoryController = {
 
     async getAll(req, res, next) {
         try {
-            const categories = await getAllCategories();
+            const categories = await getAllCategories(req.res._id);
             res.json(categories);
         } catch (error) {
             next(error);

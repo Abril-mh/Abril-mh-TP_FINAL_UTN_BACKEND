@@ -1,8 +1,8 @@
 import { categoryRepository } from "../repositories/category.repository.js";
 
 // Obtener todas las categorías
-export async function getAllCategories() {
-    return await categoryRepository.findAll();
+export async function getAllCategories(userId) {
+    return await categoryRepository.findByUser(userId);
 }
 
 // se Crea categoría, jiji
