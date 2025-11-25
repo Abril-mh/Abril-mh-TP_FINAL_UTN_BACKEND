@@ -3,7 +3,12 @@ import { taskService } from "../services/task.service.js";
 export const taskController = {
     create: (req, res, next) => {
         taskService.createTask({ ...req.body, userId: req.user._id })
-            .then(task => res.status(201).json(task))
+            .then(result => {
+                if (!result.success) {
+                    return res.status(400).json(result);
+                }
+                return res.status(201).json(result);
+            })
             .catch(next);
     },
 

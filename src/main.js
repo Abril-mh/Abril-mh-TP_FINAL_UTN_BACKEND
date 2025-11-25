@@ -22,4 +22,4 @@ app.use(errorMiddleware);
 connectToMongoDB();
 
 app.listen(process.env.PORT, () =>
-    console.log('🚀 Servidor en http://localhost:${process.env.PORT}'));
+    console.log(`🚀 Servidor en http://localhost:${process.env.PORT}`));
