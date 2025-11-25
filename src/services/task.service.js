@@ -4,35 +4,25 @@ import { categoryRepository } from "../repositories/category.repository.js";
 export const taskService = {
     createTask: async ({ title, description, userId, categoryId }) => {
         try {
-            console.log("🔥 userId recibido:", userId);
-            console.log("🔥 categoryId recibido (raw):", categoryId);
-
-            // Limpiamos espacios por si acaso
             const cleanCategoryId = categoryId.trim();
-            console.log("🔥 categoryId limpio:", cleanCategoryId);
 
-            // Traemos todas las categorías del usuario
             const categories = await categoryRepository.findByUser(userId);
-            console.log("🔥 Categorías encontradas por el usuario:", categories);
-
-            // Buscamos la categoría por ID usando toString()
             const category = categories.find(c => c._id.toString() === cleanCategoryId);
-            console.log("🔥 Categoría filtrada:", category);
 
             if (!category) {
-                throw new Error("Categoría no encontrada");
+                return { success: false, message: "Categoría no encontrada" };
             }
 
-            // Creamos la tarea
-            return taskRepository.create({
+            const newTask = await taskRepository.create({
                 title,
                 description,
                 user: userId,
-                category: category._id // aseguramos que guarde ObjectId
+                category: category._id
             });
 
+            return { success: true, data: newTask };
+
         } catch (error) {
-            console.error("Error atrapado:", error);
             return { success: false, message: error.message };
         }
     },
