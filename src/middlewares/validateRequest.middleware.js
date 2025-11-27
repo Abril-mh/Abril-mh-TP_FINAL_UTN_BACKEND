@@ -8,12 +8,12 @@ export function validateRequest(schema) {
         if (error) {
             return res.status(400).json({
                 ok: false,
-                message: "Datos inválidos (Joi rugiendo como un gato enojado 😾)",
+                message: "Datos inválidos, opa",
                 errors: error.details.map(err => err.message)
             });
         }
 
-        req.body = value; //  el body ya viene limpito, como gato bañado
+        req.body = value; //  
         next();
     };
 }

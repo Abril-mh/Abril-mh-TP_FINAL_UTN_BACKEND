@@ -7,11 +7,11 @@ import ENVIRONMENT from "../config/environment.config.js";
  * @param {String} token - Token de verificación
  */
 export const sendVerificationEmail = async (toEmail, token) => {
-    const frontendUrl = ENVIRONMENT.URL_FRONTEND; 
+    const frontendUrl = ENVIRONMENT.URL_FRONTEND;
     console.log (frontendUrl)
     const verifyUrl = `${frontendUrl}/verify_email/${token}`;
     const transporter = nodemailer.createTransport({
-        service: "gmail", 
+        service: "gmail",
         auth: {
             user: ENVIRONMENT.GMAIL_USER,
             pass: ENVIRONMENT.GMAIL_PASSWORD,

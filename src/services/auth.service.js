@@ -6,13 +6,13 @@ import { generateToken } from "../utils/token.js";                  // Función 
 import { sendVerificationEmail } from "../utils/sendEmail.js";     // Envío de emails
 
 export const authService = {
-    // Registro de usuario
+    // aqui era el Registro de usuario
     register: async ({ name, email, password }) => {
-        // Verificar si ya existe el email
+        // Verificamos si ya existe el email
         const exist = await userRepository.findByEmail(email);
         if (exist) throw new Error("El email ya está registrado");
 
-        // Hashear la contraseña
+        // Hashear la contraseña, jojo
         const hashed = await bcrypt.hash(password, 10);
 
         // Generar token de verificación
@@ -26,7 +26,7 @@ export const authService = {
             verificationToken,
         });
 
-        // Enviar email de verificación
+        // Enviamos email de verificación
         await sendVerificationEmail(email, verificationToken);
 
         // Devolver usuario sin password ni token
@@ -61,7 +61,7 @@ export const authService = {
         return userSafe;
     },
 
-    // Login
+    // aca Login
     login: async ({ email, password }) => {
         const user = await userRepository.findByEmail(email);
         if (!user) throw new Error("Credenciales inválidas");
