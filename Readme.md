@@ -201,6 +201,6 @@ npm test
 
 👤 Autor
 
-Nat Huari
+Abril Huari
 Trabajo Final – UTN
 [ver Documentacion tecnica](/DOCUMENTACION.md)
