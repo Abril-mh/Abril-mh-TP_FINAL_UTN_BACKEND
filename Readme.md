@@ -1,4 +1,4 @@
-🎯 README.md — API Backend · Gestión de Tareas
+🎯 API Backend · Gestión de Tareas
 
 API REST desarrollada para una aplicación de gestión de tareas con autenticación JWT, verificación de correo electrónico, categorías personalizadas y CRUD completo de tareas.
 Arquitectura organizada y escalable en capas: Controllers → Services → Repositories → MongoDB.
