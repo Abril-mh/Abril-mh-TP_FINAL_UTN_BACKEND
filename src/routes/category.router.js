@@ -4,8 +4,9 @@ import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 router.use(authMiddleware);
+
 router.get("/", categoryController.getAll);
 router.post("/", categoryController.create);
-router.delete("/:id",authMiddleware, categoryController.delete);
+router.delete("/:id", categoryController.delete);
 
 export default router;

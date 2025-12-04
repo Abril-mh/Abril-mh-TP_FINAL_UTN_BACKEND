@@ -1,4 +1,4 @@
-import { validateRequest } from "../middlewares/validateRequest.middleware.js";
+import joi from "joi";
 import { registerSchema } from "../schemas/auth.schema.js";
 
 export function validateRequest(schema) {

@@ -13,13 +13,13 @@ export const taskController = {
     },
 
     getAll: (req, res, next) => {
-        taskService.getTasksByUser(req.user.id)
+        taskService.getTasksByUser(req.user._id)
             .then(tasks => res.json(tasks))
             .catch(next);
     },
 
     update: (req, res, next) => {
-        taskService.updateTask(req.params.id, req.user.id, req.body)
+        taskService.updateTask(req.params.id, req.user._id, req.body)
             .then(task => res.json(task))
             .catch(next);
     },
