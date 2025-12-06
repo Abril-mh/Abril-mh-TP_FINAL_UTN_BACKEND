@@ -18,7 +18,7 @@ app.use("/api/categories", categoryRoutes);
 
 app.use(errorMiddleware);
 const PORT = process.env.PORT || 8080;
-connectionToMongoDB().then(() => {
+connectToMongoDB().then(() => {
     app.listen(PORT, () => {
         console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
     });
