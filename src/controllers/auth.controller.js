@@ -30,12 +30,17 @@ export const authController = {
     login: async (req, res, next) => {
         try {
             const token = await authService.login(req.body);
+
             res.status(200).json({
-                success: true,
-                token,
+                ok: true,
+                auth_token: token
             });
+
         } catch (error) {
-            next(error);
+            return res.status(400).json({
+                ok: false,
+                error: error.message || "Credenciales inválidas"
+            });
         }
-    },
-};
+    }
+}
