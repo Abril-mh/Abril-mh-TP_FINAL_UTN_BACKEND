@@ -4,20 +4,22 @@ import { categoryRepository } from "../repositories/category.repository.js";
 export const taskService = {
     createTask: async ({ title, description, userId, categoryId }) => {
         try {
-            const cleanCategoryId = categoryId.trim();
+            let category = null;
 
-            const categories = await categoryRepository.findByUser(userId);
-            const category = categories.find(c => c._id.toString() === cleanCategoryId);
+            // Si viene categoryId, buscamos la categoría. Si no, seguimos sin romper nada.
+            if (categoryId) {
+                const cleanCategoryId = categoryId.trim();
 
-            if (!category) {
-                return { success: false, message: "Categoría no encontrada" };
+                const categories = await categoryRepository.findByUser(userId);
+                category = categories.find(c => c._id.toString() === cleanCategoryId);
             }
 
+            // Crear la tarea incluso si NO hay categoría
             const newTask = await taskRepository.create({
                 title,
-                description,
+                description: description || "",
                 user: userId,
-                category: category._id
+                category: category ? category._id : null
             });
 
             return { success: true, data: newTask };
