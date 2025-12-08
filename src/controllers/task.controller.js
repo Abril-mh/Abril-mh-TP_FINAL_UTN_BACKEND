@@ -23,7 +23,6 @@ export const taskController = {
             .then(task => res.json(task))
             .catch(next);
     },
-
     delete: (req, res, next) => {
         taskService.deleteTask(req.params.id, req.user._id)
             .then(() => res.json({ message: "Tarea eliminada" }))

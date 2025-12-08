@@ -33,7 +33,7 @@ export const taskService = {
 
     updateTask: async (taskId, userId, data) => {
         const task = await taskRepository.findById(taskId);
-        if (!task || task.user.toString() !== userId) {
+        if (!task || task.user.toString() !== userId.toString()) {
             throw new Error("Tarea no encontrada o no autorizada");
         }
         return taskRepository.update(taskId, data);
@@ -41,7 +41,7 @@ export const taskService = {
 
     deleteTask: async (taskId, userId) => {
         const task = await taskRepository.findById(taskId);
-        if (!task || task.user.toString() !== userId) {
+        if (!task || task.user.toString() !== userId.toString()) {
             throw new Error("Tarea no encontrada o no autorizada");
         }
         return taskRepository.delete(taskId);
