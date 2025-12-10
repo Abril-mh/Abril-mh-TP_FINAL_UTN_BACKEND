@@ -1,9 +1,8 @@
-// authService.js
-import bcrypt from "bcrypt";             // Para encriptar contraseñas
-import jwt from "jsonwebtoken";          // Para generar y verificar tokens JWT
-import { userRepository } from "../repositories/user.repository.js"; // Acceso a la DB
-import { generateToken } from "../utils/token.js";                  // Función para generar JWT
-import { sendVerificationEmail } from "../utils/sendEmail.js";     // Envío de emails
+import bcrypt from "bcrypt";            
+import jwt from "jsonwebtoken";         
+import { userRepository } from "../repositories/user.repository.js"; 
+import { generateToken } from "../utils/token.js";                
+import { sendVerificationEmail } from "../utils/sendEmail.js";     
 
 export const authService = {
     // aqui era el Registro de usuario

@@ -1,483 +1,245 @@
-📘 DOCUMENTACIÓN TÉCNICA – FRONTEND (TP FINAL UTN)
+📘 DOCUMENTACIÓN TÉCNICA – Backend (TP FINAL UTN)
 
-Este documento describe la arquitectura, los componentes, la navegación, el flujo interno, comunicación con backend, hooks, contextos y middleware del frontend creado para el TP Final UTN.
-
-
----
-
-📁 1. Estructura del Proyecto
-
-frontend/
-├─ src/
-│  ├─ config/
-│  │   └─ environment.js
-│  ├─ context/
-│  │   └─ AuthContext.jsx
-│  ├─ hooks/
-│  │   ├─ useFetch.js
-│  │   └─ useForm.js
-│  ├─ middleware/
-│  │   └─ AuthMiddleware.jsx
-│  ├─ screens/
-│  │   ├─ LoginScreen.jsx
-│  │   ├─ RegisterScreen.jsx
-│  │   ├─ VerificationScreen.jsx
-│  │   ├─ HomeScreen.jsx
-│  │   ├─ CategoriesScreen.jsx
-│  │   ├─ CreateTaskScreen.jsx
-│  │   └─ EditTaskScreen.jsx
-│  ├─ services/
-│  │   ├─ authService.js
-│  │   ├─ taskService.js
-│  │   └─ categoryService.js
-│  ├─ router/
-│  │   └─ AppRouter.jsx
-│  └─ main.jsx
-└─ package.json
+Este documento describe a fondo la arquitectura, capas, flujo, middlewares, modelos y validaciones del backend.
 
 
 ---
 
-🌐 2. Configuración Global
+📁 1. Estructura de Carpetas
 
-2.1. environment.js
-
-Define la URL base del backend y permite que el proyecto funcione de forma local o en producción:
-
-const ENVIRONMENT = {
-  URL_API: import.meta.env.VITE_APP_API_URL
-};
-
-export default ENVIRONMENT;
-
-En Vercel se configura la variable:
-
-VITE_APP_API_URL = https://abril-mh-tp-final-utn-backend.vercel.app
+backend/
+├─ config/
+│   └─ config.js
+├─ controllers/
+│   ├─ auth.controller.js
+│   ├─ category.controller.js
+│   └─ task.controller.js
+├─ middlewares/
+│   ├─ auth.middleware.js
+│   ├─ validateRequest.middleware.js
+│   └─ errorHandler.middleware.js
+├─ models/
+│   ├─ user.model.js
+│   ├─ category.model.js
+│   └─ task.model.js
+├─ repositories/
+│   ├─ user.repository.js
+│   ├─ category.repository.js
+│   └─ task.repository.js
+├─ routers/
+│   ├─ auth.router.js
+│   ├─ category.router.js
+│   └─ task.router.js
+├─ schemas/
+│   ├─ auth.schema.js
+│   ├─ category.schema.js
+│   └─ task.schema.js
+├─ services/
+│   ├─ auth.service.js
+│   ├─ category.service.js
+│   └─ task.service.js
+└─ server.js
 
 
 ---
 
-🔐 3. Autenticación
+🧱 2. Arquitectura por Capas
 
-El proyecto tiene un AuthContext, un AuthMiddleware y pantallas dedicadas a login/registro/verificación.
+1. Controllers
 
+Reciben la request, llaman al service y devuelven respuesta limpia.
 
----
+2. Services
 
-📌 3.1. AuthContext.jsx
+Contienen la lógica de negocio:
 
-Responsabilidades:
+Crear usuario
 
-Guardar al usuario autenticado.
+Generar código
 
-Decodificar el token JWT.
+Validar verify
 
-Mantener persistencia con localStorage.
-
-Cerrar sesión.
-
-Redirigir cuando el token es inválido o expiró.
+CRUD de tareas y categorías
 
 
-Flujo interno:
+3. Repositories
 
-1. Al iniciar, intenta leer token desde localStorage.
+Consultas directas a MongoDB vía Mongoose.
 
+Ejemplo:
 
-2. Si existe → lo decodifica y guarda la información.
+findAllByUserId: (userId) => Task.find({ userId }),
 
+4. Middlewares
 
-3. Si no es válido → borra sesión.
+Validación con Joi
 
+Autenticación con JWT
 
-4. Provee funciones:
-
-loginUser(token)
-
-logoutUser()
-
-isLogged
+Manejo de errores centralizado
 
 
+5. Models
+
+Modelan las colecciones:
+
+User
+
+Task
+
+Category
 
 
 
 ---
 
-🛣️ 3.2. AuthMiddleware.jsx
-
-Protege rutas privadas.
-
-Si el usuario no está autenticado, redirige a "/login".
-
-Uso en router:
-<Route 
-  path="/home" 
-  element={
-    <AuthMiddleware>
-        <HomeScreen />
-    </AuthMiddleware>
-  }
-  />
-
-
----
-
-🔑 3.3. Flujo de Autenticación Completo
+🔐 3. Autenticación + Verificación
 
 Registro
 
-1. Usuario envía email + contraseña.
+1. Hash de contraseña
 
 
-2. Backend crea el usuario.
+2. Generación de código de 6 dígitos
 
 
-3. Backend envía código de verificación por email.
+3. Guardado del usuario
+
+
+4. Envío de email con Nodemailer
 
 
 
 Verificación
 
-1. Usuario ingresa a VerificationScreen.
+User ingresa email y código
 
+Si coincide → verified = true
 
-2. Envia email + código recibido.
-
-
-3. Backend responde con token JWT.
-
-
-4. AuthContext guarda token y redirige al Home.
-
+Devuelve JWT
 
 
 Login
 
-1. Usuario ingresa email + contraseña.
+Comprueba email + password
 
+Si no está verificado → no permite ingresar
 
-2. Si está verificado → backend devuelve token.
-
-
-3. AuthContext lo guarda.
-
-
-4. Redirige a Home.
-
+Devuelve token JWT
 
 
 
 ---
 
-⚙️ 4. Hooks Personalizados
+📝 4. Tareas (Tasks)
+
+Cada tarea tiene:
+
+title
+
+description
+
+status: pendiente | completada
+
+categoryId
+
+userId (para filtrar por usuario)
 
 
----
+El service controla:
 
-📌 4.1 useForm.js
+Validación
 
-Maneja estados de formularios.
+Permisos
 
-Devuelve:
-
-form
-
-handleChange
-
-resetForm
-
-
-
-Uso típico:
-
-const { form, handleChange } = useForm({ email: "", password: "" });
-
-
----
-
-📌 4.2 useFetch.js
-
-Realiza peticiones GET, POST, PUT, DELETE.
-
-Maneja loading y error automáticamente.
-
-Tiene soporte para token JWT.
-
-
-const { data, loading, error, execute } = useFetch("/tasks", "GET");
-
-
----
-
-🧭 5. Enrutamiento (Router)
-
-El router define rutas públicas y privadas:
-
-Rutas Públicas
-
-/login
-
-/register
-
-/verification
-
-
-Rutas Privadas
-
-/home → Listado de tareas
-
-/categories → CRUD de categorías
-
-/task/create → Crear tarea
-
-/task/edit/:id → Editar tarea
+Respuestas limpias
 
 
 
 ---
 
-🧩 6. Pantallas (Screens)
+🗂️ 5. Categorías (Categories)
+
+Propiedades:
+
+name
+
+userId
 
 
----
+Reglas:
 
-🔹 6.1 LoginScreen
+Cada usuario solo ve sus categorías
 
-Formulario de email y password.
-
-Llama a login() desde authService.js.
-
-Si el usuario no está verificado → redirige a VerificationScreen.
-
-
-
----
-
-🔹 6.2 RegisterScreen
-
-Formulario de registro.
-
-Llama a register() del backend.
-
-Notifica por pantalla que revise su correo.
+No se pueden ver categorías de otros
 
 
 
 ---
 
-🔹 6.3 VerificationScreen
+🧪 6. Validaciones (Schemas)
 
-Pide email + código de verificación.
+Ejemplo con Joi:
 
-Llama a verifyUser() del backend.
+export const loginSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required()
+});
 
-Guarda token en AuthContext.
+Se aplican con:
 
-Redirige al Home.
-
-
-
----
-
-🔹 6.4 HomeScreen
-
-Carga todas las tareas del usuario.
-
-Permite ver estado, categoría, descripción.
-
-Botones para:
-
-Editar tarea
-
-Eliminar tarea
-
-
+validateRequest(authSchema)
 
 
 ---
 
-🔹 6.5 CategoriesScreen
-
-CRUD completo de categorías.
-
-Utiliza categoryService.js.
-
-
-
----
-
-🔹 6.6 CreateTaskScreen
-
-Formulario para crear tarea:
-
-Título
-
-Descripción
-
-Categoría
-
-Estado inicial: pendiente
-
-
-
----
-
-🔹 6.7 EditTaskScreen
-
-Igual que CreateTaskScreen, pero:
-
-Carga los datos de la tarea por ID.
-
-Permite actualizar.
-
-
-
----
-
-🔌 7. Servicios (Services)
-
-
----
-
-7.1 authService.js
-
-login(email, password)
-
-register(form)
-
-verifyUser(email, code)
-
+🔌 7. Conexión a MongoDB
 
 Usa:
 
-await fetch(`${ENVIRONMENT.URL_API}/auth/login`);
+mongoose.connect(config.MONGO_DB_CONNECTION_STRING)
+
+Reconecta en caso de error.
 
 
 ---
 
-7.2 taskService.js
+✉️ 8. Servicio de Email
 
-Funciones:
+Nodemailer envía un correo con:
 
-getTasks()
+Código de verificación
 
-createTask()
+Mensaje personalizado
 
-updateTask()
 
-deleteTask()
-
+Plantilla HTML incluida.
 
 
 ---
 
-7.3 categoryService.js
+🔄 9. Flujo Interno Completo
 
-Funciones:
-
-getCategories()
-
-createCategory()
-
-updateCategory()
-
-deleteCategory()
-
-
-
----
-
-🔐 8. Persistencia con localStorage
-
-Se guardan:
-
-token
-
-user decodificado
-
-
-Se elimina al:
-
-Cerrar sesión
-
-Expirar token
-
-Error de autenticación
-
+Request →
+Router →
+validateRequest (Joi) →
+authMiddleware (si aplica) →
+Controller →
+Service →
+Repository →
+MongoDB →
+Response JSON
 
 
 ---
 
-🚀 9. Despliegue en Vercel
+🛡️ 10. Seguridad
 
-Variables necesarias:
+✔ Hash con bcrypt
+✔ JWT firmado
+✔ Tokens expirables
+✔ Middleware de autenticación
+✔ Protección por userId
+✔ Validación completa con Joi
+✔ Sanitización básica
 
-VITE_APP_API_URL=https://abril-mh-tp-final-utn-backend.vercel.app
-
-Build Command:
-
-npm run build
-
-Output:
-
-dist/
-
-
----
-
-🧪 10. Pruebas
-
-10.1 Pruebas manuales
-
-Login con credenciales válidas
-
-Login con usuario no verificado
-
-Registro de usuario nuevo
-
-Verificación con código válido
-
-Verificación con código incorrecto
-
-CRUD completo de categorías
-
-CRUD completo de tareas
-
-
-
----
-
-🛡️ 11. Manejo de Errores
-
-Ejemplos:
-
-Token inválido → cerrar sesión automáticamente.
-
-Backend caído → mensaje de error general.
-
-Error de validación → mensaje en pantalla.
-
-
-
----
-
-🧱 12. Buenas prácticas aplicadas
-
-DRY: Servicios reutilizables.
-
-YAGNI: Código mínimo necesario.
-
-KISS: Arquitectura simple.
-
-Estados globales con Context API.
-
-Componentes claros y separados.
-
-Hooks reutilizables.
-
-
-
----
-
-🎉 FIN DE DOCUMENTACIÓN

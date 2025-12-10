@@ -1,18 +1,30 @@
-🎯 API Backend · Gestión de Tareas
+✅ README.md — Backend TP Final (versión PRO)
 
-API REST desarrollada para una aplicación de gestión de tareas con autenticación JWT, verificación de correo electrónico, categorías personalizadas y CRUD completo de tareas.
-Arquitectura organizada y escalable en capas: Controllers → Services → Repositories → MongoDB.
+🎯 API Backend · Gestión de Tareas (TP FINAL UTN)
+
+API REST desarrollada para una aplicación completa de gestión de tareas con autenticación JWT, verificación por código de 6 dígitos, categorías personalizadas y CRUD de tareas.
+Arquitectura organizada en capas: Controllers → Services → Repositories → MongoDB → Middlewares → Schemas.
 
 
 ---
 
 🛠️ Stack Tecnológico
 
-- Node.js
-- MongoDB
-- joi
-- express
-- nodemailer
+Node.js
+
+Express
+
+MongoDB + Mongoose
+
+Joi (validaciones)
+
+Nodemailer (envío de código de verificación)
+
+JWT (Json Web Token)
+
+Bcrypt (hash de contraseñas)
+
+Vercel (deploy)
 
 
 
@@ -20,41 +32,71 @@ Arquitectura organizada y escalable en capas: Controllers → Services → Repos
 
 🌐 Despliegue
 
-Backend en Vercel: https://abril-mh-tp-final-utn-backend.vercel.app
+Backend desplegado en Vercel:
+👉 (Acá pegás tu URL cuando la tengas)
 
-Base de Datos MongoDB Atlas: conexión configurada vía variables de entorno
-
+Base de datos alojada en MongoDB Atlas, integrada mediante variables de entorno.
 
 
 ---
 
 🚀 Características Principales
 
-🔐 Autenticación con JWT (login, protección de rutas)
+🔐 Autenticación Completa
 
-✉️ Verificación de cuenta por email (con token firmado)
+Registro con validación (Joi)
 
-🧑‍💼 Registro de usuarios con validación robusta
+Hash de contraseñas
 
-🗂️ Gestión completa de categorías
+Login con JWT
 
-📝 CRUD de tareas asociadas a usuario y categoría
+Middleware para proteger rutas privadas
 
-✔️ Validación de datos con Joi
+Verificación de email con código de 6 dígitos generado y almacenado en la base de datos
 
-🧱 Arquitectura modular, limpia y escalable
 
-🛠️ Middlewares de errores y autenticación
+📝 Gestión de Tareas (CRUD)
 
-📬 Servicios desacoplados (auth, mail, tasks, categories)
+Crear tareas
 
+Editar tareas
+
+Eliminar tareas
+
+Obtener todas las tareas del usuario
+
+Filtrar por usuario con protección JWT
+
+
+🗂️ Gestión de Categorías
+
+Crear categorías personalizadas
+
+Listar categorías del usuario
+
+Eliminar categorías
+
+Asociar tareas a categorías
+
+
+🧱 Arquitectura Modular
+
+Controllers limpios
+
+Services con lógica de negocio
+
+Repositories conectados a MongoDB
+
+Middlewares de autenticación y validación
+
+Schemas con Joi
 
 
 ---
 
 ⚙️ Variables de Entorno
 
-Crea un archivo .env:
+Crear un archivo .env:
 
 PORT=4000
 
@@ -64,7 +106,7 @@ MONGO_DB_CONNECTION_STRING=
 # JWT
 JWT_SECRET=
 
-# Email
+# Email (verificación)
 GMAIL_USER=
 GMAIL_PASSWORD=
 
@@ -72,18 +114,16 @@ GMAIL_PASSWORD=
 URL_FRONTEND=
 URL_BACKEND=
 
-> ⚠️ IMPORTANTE:
-Para Gmail debés usar Contraseña de aplicación (no la contraseña común).
-
-
+⚠️ IMPORTANTE:
+Para Gmail debés usar Contraseña de aplicación, no la contraseña común.
 
 
 ---
 
 🏗️ Instalación
 
-# Clonar el repo
-git clone <repo>
+# Clonar el repositorio
+git clone <url>
 cd backend
 
 # Instalar dependencias
@@ -111,15 +151,15 @@ npm start
 
 Método	Endpoint	Descripción
 
-POST	/auth/register	Registro + envío de email
-GET	/auth/verify	Verificación de cuenta
-POST	/auth/login	Inicio de sesión (devuelve JWT)
+POST	/auth/register	Registrar nuevo usuario + enviar código
+GET	/auth/verify	Verificar cuenta con código de 6 dígitos
+POST	/auth/login	Iniciar sesión (devuelve JWT)
 
 
 
 ---
 
-🗂️ Categorías (Requiere JWT)
+🗂️ Categorías (JWT requerido)
 
 Método	Endpoint	Descripción
 
@@ -131,11 +171,12 @@ DELETE	/categories/:id	Eliminar categoría
 
 ---
 
-📝 Tareas (Requiere JWT)
+📝 Tareas (JWT requerido)
 
 Método	Endpoint	Descripción
 
 GET	/tasks	Obtener todas las tareas del usuario
+GET	/tasks/:id	Obtener tarea por ID
 POST	/tasks	Crear tarea
 PUT	/tasks/:id	Editar tarea
 DELETE	/tasks/:id	Eliminar tarea
@@ -144,56 +185,76 @@ DELETE	/tasks/:id	Eliminar tarea
 
 ---
 
-🔒 Seguridad Implementada
+🔒 Seguridad
 
 Hash de contraseñas con bcrypt
 
 Tokens JWT firmados con JWT_SECRET
 
-Validaciones con Joi en cada request crítica
+Validaciones con Joi antes de llegar a controllers
 
-Middleware que exige:
+Middleware de autenticación que exige:
+
+
 Authorization: Bearer <token>
 
-Evita accesos a datos de otros usuarios
+Cada recurso está aislado por userId
+(¡Un usuario no puede ver recursos de otro!)
 
 
 
 ---
 
-🔄 Flujo Interno de Datos
+🔄 Flujo Interno
 
 Cliente → Router → Middleware → Controller → Service → Repository → MongoDB
 
-Controllers: reciben y devuelven datos
+Controllers → reciben requests y devuelven respuestas
 
-Services: contienen la lógica de negocio
+Services → lógica de negocio
 
-Repositories: interactúan con la base de datos
+Repositories → consultas a Mongo
 
-Schemas: validan el body antes de procesar
+Schemas → validan datos
+
+Middleware → protege rutas con JWT
+
+
+
+---
+
+🧪 Testing Manual Sugerido
+
+Registro con email válido
+
+Recibir código por email
+
+Verificar con código correcto
+
+Verificar con código incorrecto
+
+Login con usuario verificado
+
+CRUD completo de categorías
+
+CRUD completo de tareas
+
+Acceder sin token → 401
+
+Token vencido → 401
 
 
 
 ---
 
-🧪 Testing (Opcional por si lo agregás después)
+🛠️ Troubleshooting
 
-npm test
+Error	Solución
 
-
----
-
-🛠️ Troubleshooting (Errores Comunes)
-
-❌ MongooseError: connection timed out
-✔ Revisá la cadena de conexión MongoDB Atlas
-
-❌ No llega el email
-✔ Activar “Contraseña de aplicación” en Google
-
-❌ JWT inválido
-✔ Revisar que el frontend envíe Bearer token
+❌ MongooseError: connection timed out	Revisar cadena de conexión de Mongo Atlas
+❌ Email no enviado	Usar contraseña de aplicación en Gmail
+❌ JWT inválido	Revisar si el frontend envía Bearer <token>
+❌ Cannot GET /edit-task/...	Verificar rutas de React en frontend
 
 
 
@@ -202,5 +263,5 @@ npm test
 👤 Autor
 
 Abril Huari
-Trabajo Final – UTN
-[ver Documentacion tecnica](/DOCUMENTACION.md)
+Trabajo Final – UTN 💙
+
