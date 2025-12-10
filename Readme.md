@@ -256,7 +256,8 @@ Error	Solución
 ❌ JWT inválido	Revisar si el frontend envía Bearer <token>
 ❌ Cannot GET /edit-task/...	Verificar rutas de React en frontend
 
-
+---
+[ver Documentacion tecnica](/DOCUMENTACION.md)
 
 ---
 
