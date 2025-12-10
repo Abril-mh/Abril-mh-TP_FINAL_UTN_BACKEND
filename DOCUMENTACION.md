@@ -9,7 +9,9 @@ Este documento describe a fondo la arquitectura, capas, flujo, middlewares, mode
 
 backend/
 ├─ config/
-│   └─ config.js
+│   └─ configMongoDB.config.js
+│   └─ enviroment.config.js
+│   └─ mailTransporter.config.js
 ├─ controllers/
 │   ├─ auth.controller.js
 │   ├─ category.controller.js
@@ -38,8 +40,11 @@ backend/
 │   ├─ auth.service.js
 │   ├─ category.service.js
 │   └─ task.service.js
-└─ server.js
-
+├─ utils/
+│   ├─ sendEmail.js
+│   ├─ token.js
+└─ error.js
+└─ main.js
 
 ---
 

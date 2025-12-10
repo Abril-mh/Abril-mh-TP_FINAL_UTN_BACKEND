@@ -1,4 +1,4 @@
-✅ README.md — Backend TP Final (versión PRO)
+✅ README.md — Backend TP Final 
 
 🎯 API Backend · Gestión de Tareas (TP FINAL UTN)
 
